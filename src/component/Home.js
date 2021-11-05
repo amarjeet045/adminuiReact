@@ -6,7 +6,7 @@ export default function Home() {
   const emailRef =  useRef();
   const nameRef =  useRef();
   const roleRef =  useRef();
-  console.log(nameRef)
+  
   const [data, setData] = useState([]);
   const [pageNum, setPageNum] = useState(0);
   const [searchInput, setSearchInput] = useState("");
@@ -14,6 +14,7 @@ export default function Home() {
   const [show, setShow] = useState(false);
   const [editId,setEditId] = useState(null)
   const [selectShow,setSelectShow] =  useState(null);
+  const [selectDeleteCheckbox,setSelectDeleteCheckbox] = useState([]);
 
   const handleClose = () => setShow(false);
   function checkAll(e) {
@@ -26,9 +27,22 @@ export default function Home() {
 
 console.log("select all clicked",value)
   }
+  const x = [];
   function check (e) {
-    setSelectShow(true)
-    console.log(e.target.checked)
+    
+    if(e.target.checked)
+    {
+      console.log(e.target.getAttribute("id"))
+      console.log("true")
+      x.push(e.target.getAttribute("id"))
+      setSelectDeleteCheckbox([...selectDeleteCheckbox, e.target.getAttribute("id")])
+      console.log(x,selectDeleteCheckbox)
+      setSelectShow(true)
+    }
+    else{
+      setSelectShow(false)
+    }
+    
   }
   function handleEdit(e) {
     console.log(e.target.getAttribute("id"));
@@ -86,6 +100,16 @@ console.log("select all clicked",value)
       setFilteredResults(data);
     }
   }
+
+  function handleCheckBoxDelete(e)
+  {
+    console.log("handle select delete button",selectDeleteCheckbox)
+    const deleteDate = data.filter(doc =>!selectDeleteCheckbox.includes(doc.id))
+    setFilteredResults(deleteDate);
+    setSelectShow(false)
+
+    
+  }
   useEffect(() => {
     fetch(
       `https://geektrust.s3-ap-southeast-1.amazonaws.com/adminui-problem/members.json`,
@@ -101,6 +125,7 @@ console.log("select all clicked",value)
       })
       .catch((error) => console.log(error));
   }, []);
+  console.log(x)
   const perPageRecord = 10;
   const totalRecords = data.length;
   console.log(totalRecords);
@@ -124,7 +149,7 @@ console.log("select all clicked",value)
         <>
           <tr key={doc.id}>
             <td>
-              <input name="all" type="checkbox" onChange={check} />
+              <input name="all" type="checkbox" id={doc.id} onChange={check} />
             </td>
             <td>{doc.name}</td>
             <td>{doc.email}</td>
@@ -146,8 +171,12 @@ console.log("select all clicked",value)
         </>
       );
     });
+
+    
+      
+    
   
-    console.log(selectShow)
+    
   const changePage = ({ selected }) => {
     setPageNum(selected);
   };
@@ -217,6 +246,10 @@ console.log("select all clicked",value)
         disabledClassName={"paginationDisabled"}
         activeClassName={"paginationActive"}
       />
+      <>
+      {selectShow?<><button onClick={handleCheckBoxDelete}>Delete Selected</button></>:""}
+      </>
+      
      
     </>
   );
